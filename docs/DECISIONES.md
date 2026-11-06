@@ -82,3 +82,11 @@ En ambos casos se excluyen las frases **negadas** ("no puedo recomendarte…", "
 **Por qué incluir el punto 3:** es la variante más dañina. El afiliado cree tener turno un día y lo tiene otro, y no se entera hasta que va. Además es detectable con datos estructurados de ambos lados: las opciones de `buscar_turnos` y el `id_turno` reservado.
 
 **Descartado:** documentar el punto 3 como límite sin implementarlo.
+
+## D7 — INVENTA: cómo detectar "muestra turnos" sin castigar el reintento
+
+**Decisión:** falla si un mensaje de Ana muestra turnos y la **última** llamada a `buscar_turnos` anterior a ese mensaje devolvió `error`.
+
+**Por qué "la última":** si Ana informa el error, reintenta y el segundo llamado funciona, los turnos que muestra están respaldados. Es el comportamiento que pide el spec ("lo dice y ofrece reintentar"). Mirar cualquier error previo castigaría ese caso.
+
+**Qué cuenta como "mostrar turnos":** una hora (`10:00`, `9:30`) en el texto de Ana. Un día suelto no alcanza ("probá de nuevo el lunes" es válido). Es el mismo criterio de precisión sobre cobertura que en D6.

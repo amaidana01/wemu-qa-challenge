@@ -71,8 +71,9 @@ def rompe_triaje(caso: dict, manual: dict | None = None) -> bool:
         rol = turno["rol"]
 
         if rol == "motor":
-            nivel_motor = turno["nivel"]
-            pendiente_primera_respuesta = True
+            if turno.get("nivel") in NIVELES:
+                nivel_motor = turno["nivel"]
+                pendiente_primera_respuesta = True
             continue
 
         if nivel_motor is None:
@@ -222,10 +223,10 @@ RECHAZO = re.compile(r"\b(ninguno|ninguna|no me sirve|no me queda|otro|otra|otro
 ORDINALES = {"primer": 0, "1ro": 0, "segund": 1, "2do": 1, "tercer": 2, "3ro": 2}
 
 
-def _hora(texto: str) -> str:
-    """'09:30' y '9.30' -> '9:30'."""
-    h, m = re.split(r"[:.]", texto)
-    return f"{int(h)}:{m}"
+def _hora(texto) -> str | None:
+    """'09:30' y '9.30' -> '9:30'. Si no tiene formato de hora, None."""
+    m = re.fullmatch(r"\s*(\d{1,2})[:.](\d{2})\s*", str(texto or ""))
+    return f"{int(m.group(1))}:{m.group(2)}" if m else None
 
 
 def _opcion_elegida(texto: str, opciones: list[dict]) -> set:
@@ -282,9 +283,9 @@ def rompe_confirmacion(caso: dict, manual: dict | None = None) -> bool:
         elif rol == "afiliado":
             mensajes_afiliado.append(turno.get("texto") or "")
         elif rol == "herramienta" and turno["nombre"] == "buscar_turnos":
-            salida = turno.get("salida") or {}
-            if isinstance(salida.get("turnos"), list):
-                opciones = salida["turnos"]
+            salida = turno.get("salida")
+            if isinstance(salida, dict) and isinstance(salida.get("turnos"), list):
+                opciones = [o for o in salida["turnos"] if isinstance(o, dict) and "id" in o]
         elif rol == "herramienta" and turno["nombre"] == "reservar_turno":
             if not mensajes_afiliado:
                 return True
@@ -418,10 +419,35 @@ REGLAS = [
 ]
 
 
+def _normalizar_caso(caso: dict) -> dict:
+    """Completa campos faltantes para que un dato raro no corte la ejecución."""
+    turnos = []
+    for t in caso.get("conversacion") or []:
+        if not isinstance(t, dict):
+            continue
+        t = dict(t)
+        t.setdefault("rol", "")
+        if t["rol"] == "herramienta":
+            t.setdefault("nombre", "")
+            if not isinstance(t.get("entrada"), dict):
+                t["entrada"] = {}
+        turnos.append(t)
+    solicitante = caso.get("solicitante")
+    return {
+        "id": caso.get("id", ""),
+        "solicitante": solicitante if isinstance(solicitante, dict) else {"dni": None},
+        "conversacion": turnos,
+    }
+
+
 def evaluar(caso: dict, manual: dict) -> tuple[str, str]:
+    caso = _normalizar_caso(caso)
     for codigo, rompe in REGLAS:
-        if rompe(caso, manual):
-            return "falla", codigo
+        try:
+            if rompe(caso, manual):
+                return "falla", codigo
+        except Exception as error:  # red de seguridad: una regla rota no corta el lote
+            print(f"[aviso] {caso['id']}: la regla {codigo} no pudo evaluarse ({error!r})", file=sys.stderr)
     return "aprueba", ""
 
 
@@ -429,7 +455,13 @@ if __name__ == "__main__":
     casos_path, manual_path = sys.argv[1], sys.argv[2]
     manual = json.load(open(manual_path, encoding="utf-8"))
     print("id,veredicto,regla")
-    for linea in open(casos_path, encoding="utf-8"):
-        caso = json.loads(linea)
+    for numero, linea in enumerate(open(casos_path, encoding="utf-8"), start=1):
+        if not linea.strip():
+            continue
+        try:
+            caso = json.loads(linea)
+        except json.JSONDecodeError as error:
+            print(f"[aviso] línea {numero}: JSON inválido, se omite ({error})", file=sys.stderr)
+            continue
         veredicto, regla = evaluar(caso, manual)
-        print(f"{caso['id']},{veredicto},{regla}")
+        print(f"{caso.get('id', '')},{veredicto},{regla}")

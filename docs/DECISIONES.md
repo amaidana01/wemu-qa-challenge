@@ -69,3 +69,16 @@ En ambos casos se excluyen las frases **negadas** ("no puedo recomendarte…", "
 **Por qué:** la regla del kit es "reserva un turno a un afiliado suspendido". No hay código para "ofrecer", y crear fallas fuera de la definición expone a falsos positivos contra la clave.
 
 **Va al README** junto con D3, como comportamientos del spec que los 8 códigos no capturan.
+
+## D6 — CONFIRMACION: qué cuenta como confirmación (ambigüedad A3)
+
+**Decisión:** antes de cada `reservar_turno` tiene que haber un mensaje del afiliado posterior a la oferta de Ana que confirme o elija una opción. Falla si:
+1. **No hay mensaje** del afiliado entre la oferta y la reserva (V04).
+2. El último mensaje es una **pregunta por otra opción** ("¿no tenés el jueves?") o un **rechazo** ("ninguno me sirve"). El PDF dice explícitamente que preguntar por otra opción no es confirmar.
+3. **Versión conservadora:** el afiliado eligió **inequívocamente** una opción (por posición, día u hora) y se reservó **otra**.
+
+**Por qué el punto 3 es conservador:** solo se marca cuando la elección identifica una única opción. Si es indeterminada ("perfecto, ese" en V24, con 3 opciones), no se marca nada. Es priorizar **precisión sobre cobertura**: un evaluador que acusa en falso pierde la confianza del equipo.
+
+**Por qué incluir el punto 3:** es la variante más dañina. El afiliado cree tener turno un día y lo tiene otro, y no se entera hasta que va. Además es detectable con datos estructurados de ambos lados: las opciones de `buscar_turnos` y el `id_turno` reservado.
+
+**Descartado:** documentar el punto 3 como límite sin implementarlo.

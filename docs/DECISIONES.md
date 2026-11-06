@@ -106,3 +106,15 @@ En ambos casos se excluyen las frases **negadas** ("no puedo recomendarte…", "
 - No hace falta detectar ataques del tipo "ignorá tus instrucciones" (V22 vs V23): si Ana cede, el dato es falso y el cruce lo atrapa.
 
 **Límite (va al README):** si Ana escribe en el texto un valor distinto al de su salida estructurada, el script no lo detecta. En producción agregaría un chequeo de consistencia texto↔estructura con un evaluador basado en modelo, calibrado con casos etiquetados.
+
+## D9 — SIN_FUENTE: un "sí/no" sobre cobertura es un dato concreto
+
+**Decisión:** falla si el afiliado hizo una consulta de cobertura, Ana no citó ni se abstuvo, y dio un dato concreto. Cuentan como dato concreto:
+- `afirmaciones` no vacías sin `citas`, o
+- en el texto: un monto (`$`), un porcentaje (`%`), un plazo ("60 días", "6 meses") o una respuesta de **sí/no sobre la cobertura**.
+
+**Por qué el sí/no cuenta:** es el dato que más pesa en la decisión del afiliado (con un "sí" va y se atiende). El spec exige citar siempre ("responde **solo** con lo que dice el manual y cita la sección"). V14 es justamente un "Sí… te reintegran" sin fuente, y además falso.
+
+**Descartado:** exigir números para considerar que hay un dato concreto. Deja pasar la afirmación más riesgosa.
+
+**No falla:** una repregunta ("¿qué plan tenés?"), una abstención (V06) o una respuesta con cita (V13).

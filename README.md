@@ -29,4 +29,4 @@ Criterio general: **priorizar la precisión.** Un evaluador que acusa en falso p
 - **En producción:** monitorear las consultas a DNI ajenos aunque no se muestren.
 
 ## IA
-Usé Claude para analizar los casos, plantear las ambigüedades y escribir el código y las pruebas. Las decisiones las tomé yo después de discutir alternativas y costos. Corregí: _[completar: qué propuso la IA que cambiaste o descartaste]_. Medir con código antes de implementar destapó un error de conteo en el análisis inicial.
+Usé Claude para analizar casos, plantear ambigüedades y escribir código y pruebas. Las decisiones las tomé yo, después de pedir contraejemplos y probar cada regla con casos borde (p. ej., el DNI mal tipeado de un afiliado suspendido). Corregí su recomendación de un repo privado, que el equipo evaluador no iba a poder ver. Y trabajé con una regla: no dar por bueno nada de la IA sin medirlo con código. La primera medición destapó un conteo erróneo de la IA en el análisis inicial.

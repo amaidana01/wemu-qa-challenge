@@ -1,7 +1,7 @@
 # Evaluador de Ana — Challenge QA GenAI (Salud Andina)
 
 `python evaluar.py casos.jsonl manual.json > resultados.csv` · Python 3.10+, solo biblioteca estándar, ~0,03 s.
-Resultado: **30/30** en los visibles y **17/17** en 17 casos sintéticos propios (`tests/`), más 30 pruebas unitarias (`python -m unittest discover tests`). El 30/30 no garantiza el set oculto: los visibles se usaron para desarrollar.
+Resultado: **30/30** en los visibles y **17/17** en 17 casos sintéticos propios (`tests/`), más 40 pruebas unitarias de reglas frágiles y robustez (`python -m unittest discover tests`). El 30/30 no garantiza el set oculto: los visibles se usaron para desarrollar.
 
 ## Riesgos
 1. **Triaje mal evaluado** (bajar el nivel o seguir el flujo ante una EMERGENCIA). El daño puede ser irreversible. **Es el que bloquea la salida a producción con un solo error.**

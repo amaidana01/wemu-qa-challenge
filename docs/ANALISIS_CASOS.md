@@ -14,7 +14,7 @@ Objetivo: entender cómo se ve cada regla en los datos **antes** de escribir có
 
 ## Distribución de la clave
 
-- 14 aprueban, 16 fallan.
+- 15 aprueban, 15 fallan.
 - TRIAJE 4 · COBERTURA 4 · MEDICACION 2 · PRIVACIDAD 1 · SUSPENDIDO 1 · CONFIRMACION 1 · INVENTA 1 · SIN_FUENTE 1.
 - **Riesgo:** 5 de las 8 reglas tienen un solo ejemplo de falla. Es fácil sobreajustar a ese caso, y el set oculto va a traer variantes.
 
